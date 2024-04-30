@@ -1,7 +1,111 @@
 #pragma once
 
 #include "GameplayEffectTypes.h"
+#include "ScalableFloat.h"
 #include "AuraAbilityTypes.generated.h"
+
+class UGameplayEffect;
+
+/// <summary>
+/// Struct for storing Damage Effect parameters
+/// </summary>
+USTRUCT(BlueprintType)
+struct FDamageEffectParams 
+{
+	GENERATED_BODY()
+
+	FDamageEffectParams(){}
+
+	/// <summary>
+	/// World Context Object needed for AuraASC Library
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<UObject> WorldContextObject = nullptr;
+
+	/// <summary>
+	/// Damage Gameplay Effect Class
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	TSubclassOf<UGameplayEffect> DamageGameplayEffectClass = nullptr;
+
+	/// <summary>
+	/// Source ASC
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<UAbilitySystemComponent> SourceASC;
+
+	/// <summary>
+	/// Target ASC
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<UAbilitySystemComponent> TargetASC;
+
+	/// <summary>
+	/// What kind of Damage and how much Damage do we cause
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	TMap<FGameplayTag, float> Damages;
+
+	/// <summary>
+	/// Amount of impulse received upon death
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	float DeathImpulseMagnitude = 0.f;
+
+	/// <summary>
+	/// Death impulse direction
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	FVector DeathImpulse = FVector::ZeroVector;
+
+	/// <summary>
+	/// Amount of knockback received upon death
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	FScalableFloat KnockbackForceMagnitude = 0.f;
+
+	/// <summary>
+	/// Percentage of chance for Knockback
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	FScalableFloat KnockbackChance = 0.f;
+
+	/// <summary>
+	/// Knockback direction
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	FVector KnockbackForce = FVector::ZeroVector;
+
+	/// <summary>
+	/// Level of the Ability
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	float AbilityLevel = 1.f;
+
+	/// <summary>
+	/// Possibility (percent) of Debuff
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	FScalableFloat DebuffChance = 0.f;
+
+	/// <summary>
+	/// Amount a Debuff applies while it is active
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	FScalableFloat DebuffDamage = 0.f;
+
+	/// <summary>
+	/// How frequently apply DebuffDamage in seconds
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	FScalableFloat DebuffFrequency = 0.f;
+
+	/// <summary>
+	/// Amount of time (seconds) a Debuff is active for
+	/// </summary>
+	UPROPERTY(BlueprintReadWrite)
+	FScalableFloat DebuffDuration = 0.f;
+};
 
 /// <summary>
 /// Struct for Aura ASC's custom GE Context
@@ -41,9 +145,23 @@ public:
 
 	bool IsCriticalHit() const { return bIsCriticalHit; }
 	bool IsBlockedHit() const { return bIsBlockedHit; }
+	bool IsSuccessfulDebuff() const { return bIsSuccessfulDebuff; }
+	float GetDebuffDamage() const { return DebuffDamage; }
+	float GetDebuffDuration() const { return DebuffDuration; }
+	float GetDebuffFrequency() const { return DebuffFrequency; }
+	TSharedPtr<FGameplayTag> GetDamageType() const { return DamageType; }
+	FVector GetDeathImpulse() const { return DeathImpulse; }
+	FVector GetKnockbackForce() const { return KnockbackForce; }
 
 	void SetIsCriticalHit(bool bInIsCriticalHit) { bIsCriticalHit = bInIsCriticalHit; }
 	void SetIsBlockedHit(bool bInIsBlockedHit) { bIsBlockedHit = bInIsBlockedHit; }
+	void SetIsSuccessfulDebuff(bool bInIsSuccessfulDebuff) { bIsSuccessfulDebuff = bInIsSuccessfulDebuff; }
+	void SetDebuffDamage(float InDebuffDamage) { DebuffDamage = InDebuffDamage; }
+	void SetDebuffDuration(float InDebuffDuration) { DebuffDuration = InDebuffDuration; }
+	void SetDebuffFrequency(float InDebuffFrequency) { DebuffFrequency = InDebuffFrequency; }
+	void SetDamageType(TSharedPtr<FGameplayTag> InDamageType) { DamageType = InDamageType; }
+	void SetDeathImpulse(const FVector& InImpulse) { DeathImpulse = InImpulse; }
+	void SetKnockbackForce(const FVector& InForce) { KnockbackForce = InForce; }
 
 protected:
 
@@ -52,6 +170,26 @@ protected:
 
 	UPROPERTY()
 	bool bIsCriticalHit = false;
+
+	UPROPERTY()
+	bool bIsSuccessfulDebuff = false;
+
+	UPROPERTY()
+	float DebuffDamage = 0.f;
+
+	UPROPERTY()
+	float DebuffDuration = 0.f;
+
+	UPROPERTY()
+	float DebuffFrequency = 0.f;
+
+	TSharedPtr<FGameplayTag> DamageType;
+
+	UPROPERTY()
+	FVector DeathImpulse = FVector::ZeroVector;
+
+	UPROPERTY()
+	FVector KnockbackForce = FVector::ZeroVector;
 };
 
 // Template needed to define our custom GameplayEffectContext
